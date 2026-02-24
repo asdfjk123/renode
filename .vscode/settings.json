@@ -1,3 +1,4 @@
 {
     "workspacePointer": "${workspaceFolder}",
+    "dotnet.preferCSharpExtension": true,
 }

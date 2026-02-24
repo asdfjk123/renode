@@ -9,8 +9,19 @@ APPNAME="Renode"
 
 #set up environment
 MONO_FRAMEWORK_PATH=/Library/Frameworks/Mono.framework/Versions/Current
-export DYLD_FALLBACK_LIBRARY_PATH="$DIR:$MONO_FRAMEWORK_PATH/lib:/lib:/usr/lib"
-export PATH="$MONO_FRAMEWORK_PATH/bin:$PATH"
+if [ -d "$MONO_FRAMEWORK_PATH" ]; then
+    export DYLD_FALLBACK_LIBRARY_PATH="$DIR:$MONO_FRAMEWORK_PATH/lib:/lib:/usr/lib"
+    export PATH="$MONO_FRAMEWORK_PATH/bin:$PATH"
+elif [ -x "/opt/homebrew/bin/mono" ]; then
+    export DYLD_FALLBACK_LIBRARY_PATH="$DIR:/opt/homebrew/lib:/lib:/usr/lib"
+    export PATH="/opt/homebrew/bin:$PATH"
+elif [ -x "/usr/local/bin/mono" ]; then
+    export DYLD_FALLBACK_LIBRARY_PATH="$DIR:/usr/local/lib:/lib:/usr/lib"
+    export PATH="/usr/local/bin:$PATH"
+else
+    export DYLD_FALLBACK_LIBRARY_PATH="$DIR:/lib:/usr/lib"
+    export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+fi
 
 # REQUIRED_MAJOR and REQUIRED_MINOR should be
 # set automatically at the moment of packaging

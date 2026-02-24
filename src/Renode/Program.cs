@@ -1,4 +1,4 @@
-//
+// 프로그램 시작점
 // Copyright (c) 2010-2025 Antmicro
 //
 // This file is licensed under the MIT License.
@@ -43,10 +43,10 @@ namespace Antmicro.Renode
                 This circular dependency seems to be a problem.
                 Here we explicitly initialize EmulationManager as this seems to resolve the problem. This is just a workaround, until we refactor the code of the initialization phase.
             */
-            Core.EmulationManager.RebuildInstance();
+            Core.EmulationManager.RebuildInstance(); // 에뮬레이터 인스턴스 생성
 
 #if NET
-            if(options.ServerMode)
+            if(options.ServerMode) // 서버 모드인 경우, 웹소켓 활성화를 위한 포트 검사
             {
                 if(!WebSockets.WebSocketsManager.Instance.Start(options.ServerModePort))
                 {
@@ -58,23 +58,24 @@ namespace Antmicro.Renode
                 Emulator.BeforeExit += WebSockets.WebSocketsManager.Instance.Dispose;
             }
 #endif
-
+            // CLI 및 백그라운드 서버를 위한 스레드
             var thread = new Thread(() =>
             {
                 try
                 {
                     if(optionsParsed)
                     {
-                        Antmicro.Renode.UI.CommandLineInterface.Run(options, (context) =>
+                        Antmicro.Renode.UI.CommandLineInterface.Run(options, (context) => // CLI 실행
+                        // CLI 에 명령어를 입력함으로써, emulation manager 관련 함수를 실행시키는 구조이다.
                         {
-                            if(options.RobotFrameworkRemoteServerPort >= 0)
+                            if(options.RobotFrameworkRemoteServerPort >= 0) // 로봇 프레임워크 (테스트 자동화 툴) 실행
                             {
-                                var rf = new RobotFrameworkEngine();
+                                var rf = new RobotFrameworkEngine(); 
                                 context.RegisterSurrogate(typeof(RobotFrameworkEngine), rf);
-                                rf.Start(options.RobotFrameworkRemoteServerPort);
+                                rf.Start(options.RobotFrameworkRemoteServerPort); // 로봇 프레임워크 포트 할당 및 실행
                             }
 #if NET
-                            if(options.ServerMode)
+                            if(options.ServerMode) // 웹소켓 활성화
                             {
                                 var wsAPI = new WebSockets.WebSocketAPI(options.ServerModeWorkDir);
                                 Emulator.BeforeExit += wsAPI.Dispose;
@@ -86,11 +87,11 @@ namespace Antmicro.Renode
                 }
                 finally
                 {
-                    Emulator.FinishExecutionAsMainThread();
+                    Emulator.FinishExecutionAsMainThread(); // 에뮬레이터 실행 종료
                 }
             });
             thread.Start();
-            Emulator.ExecuteAsMainThread();
+            Emulator.ExecuteAsMainThread(); // 스레드 실행
         }
 
         private static void ConfigureEnvironment(Options options)
